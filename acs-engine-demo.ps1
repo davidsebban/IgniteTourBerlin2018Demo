@@ -7,7 +7,8 @@ $windowsUser = "igniteuser"
 $windowsPassword = "Gut3nT4gBerlin!"
 $deploymentName = "berlindeployment"
 $AzureRegion = "WestEurope"
-$SampleJSON = "https://raw.githubusercontent.com/davidsebban/IgniteTourBerlin2018Demo/master/kubernetes-windows.json"
+$SampleJSON = "https://raw.githubusercontent.com/davidsebban/IgniteTourBerlin2018Demo/master/kubernetes.json"
+$AppYamlPath = "C:\Users\dsebban\OneDrive - NELITE\Documents\Ignite Tour\gitclone\azure-voting-app-redis\azure-vote-all-in-one-redis.yaml"
 $MasterFQDN = "$dnsPrefix.$AzureRegion.cloudapp.azure.com"
 
 #############################################
@@ -80,6 +81,8 @@ $ENV:KUBECONFIG="$demofolderpath\_output\$dnsPrefix\kubeconfig\kubeconfig.$Azure
 
 # show cluster nodes using kubectl
 kubectl get nodes
+kubectl create -f $AppYamlPath
+kubectl get service azure-vote-front --watch
 kubectl get pod
 
 
@@ -91,5 +94,5 @@ kubectl get pod
 #############################################
 # cleanup
 
-#az group delete -n $AzureRGName
+az group delete -n $AzureRGName
 #Pop-Location
