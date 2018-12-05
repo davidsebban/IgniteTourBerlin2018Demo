@@ -7,7 +7,7 @@ $windowsUser = "igniteuser"
 $windowsPassword = "Gut3nT4gBerlin!"
 $deploymentName = "berlindeployment"
 $AzureRegion = "WestEurope"
-$SampleJSON = "C:\Users\dsebban\OneDrive - NELITE\Documents\Ignite Tour\kubernetes-windows.json"
+$SampleJSON = "https://raw.githubusercontent.com/davidsebban/IgniteTourBerlin2018Demo/master/kubernetes-windows.json"
 $MasterFQDN = "$dnsPrefix.$AzureRegion.cloudapp.azure.com"
 
 #############################################
@@ -19,6 +19,7 @@ if(Test-Path $demofolderpath ) {
 }
 New-Item $demofolderpath -ItemType Directory
 push-Location $demofolderpath
+Clear-Host
 
 # login to Azure
 az login 
@@ -36,10 +37,10 @@ $sp = az ad sp create-for-rbac --role="Contributor" --scopes=$groupId | ConvertF
 # Create ACS-engine APIModel
 
 # Download template
-#Invoke-WebRequest -UseBasicParsing https://raw.githubusercontent.com/Azure/acs-engine/master/examples/windows/kubernetes.json -OutFile kubernetes-windows.json
+Invoke-WebRequest -UseBasicParsing $SampleJSON -OutFile kubernetes-windows.json
 
 # Load template
-$inJson = Get-Content $SampleJSON | ConvertFrom-Json
+$inJson = Get-Content .\kubernetes-windows.json | ConvertFrom-Json
 
 # Set dnsPrefix
 $inJson.properties.masterProfile.dnsPrefix = $dnsPrefix
@@ -80,10 +81,10 @@ $ENV:KUBECONFIG="$demofolderpath\_output\$dnsPrefix\kubeconfig\kubeconfig.$Azure
 # show cluster nodes using kubectl
 kubectl get nodes
 kubectl get pod
-kubectl get pod
+
 
 # manage cluster using dashboard
-start kubectl proxy
+# start kubectl proxy
 # http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/
 
 
