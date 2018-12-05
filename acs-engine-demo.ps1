@@ -8,7 +8,7 @@ $windowsPassword = "Gut3nT4gBerlin!"
 $deploymentName = "berlindeployment"
 $AzureRegion = "WestEurope"
 $SampleJSON = "https://raw.githubusercontent.com/davidsebban/IgniteTourBerlin2018Demo/master/kubernetes.json"
-$AppYamlPath = "C:\Users\dsebban\OneDrive - NELITE\Documents\Ignite Tour\gitclone\azure-voting-app-redis\azure-vote-all-in-one-redis.yaml"
+$AppYamlPath = "https://raw.githubusercontent.com/davidsebban/IgniteTourBerlin2018Demo/master/azure-vote-all-in-one-redis.yaml"
 $MasterFQDN = "$dnsPrefix.$AzureRegion.cloudapp.azure.com"
 
 #############################################
@@ -38,17 +38,13 @@ $sp = az ad sp create-for-rbac --role="Contributor" --scopes=$groupId | ConvertF
 # Create ACS-engine APIModel
 
 # Download template
-Invoke-WebRequest -UseBasicParsing $SampleJSON -OutFile kubernetes-windows.json
+Invoke-WebRequest -UseBasicParsing $SampleJSON -OutFile kubernetes.json
 
 # Load template
-$inJson = Get-Content .\kubernetes-windows.json | ConvertFrom-Json
+$inJson = Get-Content .\kubernetes.json | ConvertFrom-Json
 
 # Set dnsPrefix
 $inJson.properties.masterProfile.dnsPrefix = $dnsPrefix
-
-# Set Windows username & password
-$inJson.properties.windowsProfile.adminPassword = $windowsPassword
-$inJson.properties.windowsProfile.adminUsername = $windowsUser
 
 # Copy in your SSH public key from `~/.ssh/id_rsa.pub` to linuxProfile.ssh.publicKeys.keyData
 $inJson.properties.linuxProfile.ssh.publicKeys[0].keyData = [string](Get-Content "~/.ssh/id_rsa.pub")
@@ -58,11 +54,11 @@ $inJson.properties.servicePrincipalProfile.clientId = $sp.appId
 $inJson.properties.servicePrincipalProfile.secret = $sp.password
 
 # Save file
-$inJson | ConvertTo-Json -Depth 5 | Out-File -Encoding ascii -FilePath "kubernetes-windows-complete.json"
+$inJson | ConvertTo-Json -Depth 5 | Out-File -Encoding ascii -FilePath "kubernetes-complete.json"
 
 #############################################
 # Generate Azure Resource Manager template
-acs-engine.exe generate kubernetes-windows-complete.json
+acs-engine.exe generate kubernetes-complete.json
 
 #############################################
 # Deploy the cluster
@@ -81,7 +77,8 @@ $ENV:KUBECONFIG="$demofolderpath\_output\$dnsPrefix\kubeconfig\kubeconfig.$Azure
 
 # show cluster nodes using kubectl
 kubectl get nodes
-kubectl create -f $AppYamlPath
+Invoke-WebRequest -UseBasicParsing $AppYamlPath -OutFile azure-vote-all-in-one-redis.yaml
+kubectl create -f .\azure-vote-all-in-one-redis.yaml
 kubectl get service azure-vote-front --watch
 kubectl get pod
 
@@ -95,4 +92,4 @@ kubectl get pod
 # cleanup
 
 az group delete -n $AzureRGName
-#Pop-Location
+Pop-Location
